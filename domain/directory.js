@@ -1,9 +1,14 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import {getHomeDirectory} from "./operatingSystem.js";
+import { getHomeDirectory } from './operatingSystem.js';
+import { printOperationFailed } from './printMessageToConsole.js';
+import {isUpperThenRootDirectory} from "../helpers/isUpperThenRootDirectory.js";
 
 export const upDirectory = (currentWorkingDirectory) => {
-    if (getHomeDirectory() === currentWorkingDirectory) {
+    const homeDirectory = getHomeDirectory();
+
+    if (homeDirectory === currentWorkingDirectory) {
+        printOperationFailed();
         return currentWorkingDirectory;
     }
 
@@ -19,6 +24,11 @@ export const getListOfDirectoryFiles = async (directory) => {
 export const changeDirectory = async (currentDirectoryPath, newDirectoryPath) => {
     let changedPath = null;
     changedPath = path.resolve(currentDirectoryPath, newDirectoryPath);
+
+    if (isUpperThenRootDirectory(changedPath, getHomeDirectory())) {
+        printOperationFailed();
+        return currentDirectoryPath;
+    }
 
     return changedPath;
 };
