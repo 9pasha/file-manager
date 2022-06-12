@@ -15,6 +15,6 @@ export const printInvalidCommand = () => {
     console.log('Invalid input');
 };
 
-export const operationFailed = () => {
+export const printOperationFailed = () => {
     console.log('Operation failed');
 };

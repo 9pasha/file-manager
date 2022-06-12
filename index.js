@@ -16,12 +16,14 @@ import {
     copyFile,
     moveFile
 } from './domain/files.js';
-import { exitFromApplication } from "./domain/exit.js";
+import { exitFromApplication } from './domain/exit.js';
 import {
     printExitMessage,
+    printInvalidCommand,
     printMessageOfCurrentDirectory,
+    printOperationFailed,
     printStartMessage
-} from "./domain/printMessageToConsole.js";
+} from './domain/printMessageToConsole.js';
 
 let username = process.argv[2].split('=')[1];
 let currentWorkingDirectory = getHomeDirectory();
@@ -50,51 +52,58 @@ const cliController = async (message) => {
     const operationType = message[0];
     const args = message.splice(1, message.length);
 
-    switch (operationType) {
-        case OperationTypes.exitFromApplication:
-            printExitMessage(username);
-            exitFromApplication();
-            break;
-        case OperationTypes.os:
-            osController(args[0]);
-            break;
-        case OperationTypes.hash:
-            await hashController(args[0]);
-            break;
-        case OperationTypes.decompress:
-            await decompressorController(args);
-            break;
-        case OperationTypes.compress:
-            await compressorController(args);
-            break;
-        case OperationTypes.upDirectory:
-            currentWorkingDirectory = await upDirectory(currentWorkingDirectory);
-            break;
-        case OperationTypes.changeDirectory:
-            currentWorkingDirectory = await changeDirectory(currentWorkingDirectory, args[0]);
-            break;
-        case OperationTypes.listOfDirectoryFiles:
-            const directoryFilesList = await getListOfDirectoryFiles(currentWorkingDirectory);
-            console.log(directoryFilesList);
-            break;
-        case OperationTypes.readAndPrintFileContent:
-            readAndPrintFileContent(args[0]);
-            break;
-        case OperationTypes.createFileInCurrentDirectory:
-            await createFileInDirectory(currentWorkingDirectory, args[0]);
-            break;
-        case OperationTypes.deleteFile:
-            await deleteFile(args[0]);
-            break;
-        case OperationTypes.renameFile:
-            await renameFile(args[0], args[1]);
-            break;
-        case OperationTypes.copyFile:
-            await copyFile(args[0], args[1]);
-            break;
-        case OperationTypes.moveFile:
-            await moveFile(args[0], args[1]);
-            break;
+    try {
+        switch (operationType) {
+            case OperationTypes.exitFromApplication:
+                printExitMessage(username);
+                exitFromApplication();
+                break;
+            case OperationTypes.os:
+                osController(args[0]);
+                break;
+            case OperationTypes.hash:
+                await hashController(args[0]);
+                break;
+            case OperationTypes.decompress:
+                await decompressorController(args);
+                break;
+            case OperationTypes.compress:
+                await compressorController(args);
+                break;
+            case OperationTypes.upDirectory:
+                currentWorkingDirectory = await upDirectory(currentWorkingDirectory);
+                break;
+            case OperationTypes.changeDirectory:
+                currentWorkingDirectory = await changeDirectory(currentWorkingDirectory, args[0]);
+                break;
+            case OperationTypes.listOfDirectoryFiles:
+                const directoryFilesList = await getListOfDirectoryFiles(currentWorkingDirectory);
+                console.log(directoryFilesList);
+                break;
+            case OperationTypes.readAndPrintFileContent:
+                readAndPrintFileContent(args[0]);
+                break;
+            case OperationTypes.createFileInCurrentDirectory:
+                await createFileInDirectory(currentWorkingDirectory, args[0]);
+                break;
+            case OperationTypes.deleteFile:
+                await deleteFile(args[0]);
+                break;
+            case OperationTypes.renameFile:
+                await renameFile(args[0], args[1]);
+                break;
+            case OperationTypes.copyFile:
+                await copyFile(args[0], args[1]);
+                break;
+            case OperationTypes.moveFile:
+                await moveFile(args[0], args[1]);
+                break;
+            default:
+                printInvalidCommand();
+                break;
+        }
+    } catch (error) {
+        printOperationFailed();
     }
 
     printMessageOfCurrentDirectory(currentWorkingDirectory);
