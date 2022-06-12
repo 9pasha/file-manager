@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import process from 'node:process';
 import path from 'node:path';
 import { getNewPathForRenamedFile } from '../helpers/pathResolverForRenamedFile.js';
+import { getFileNameFromPath } from "../helpers/getFileNameFromPath.js";
 
 export const readAndPrintFileContent = (filePath) => {
     const readableStream = fs.createReadStream(filePath);
@@ -69,40 +70,24 @@ export const renameFile = async (filePath, newName) => {
     }
 };
 
-export const copyFile = async (oldFilePath, newFilePath) => {
-    const cloneFolder = async (oldFilePath, newFilePath) => {
-        await fs.mkdir(newFilePath);
-
-        const files = await fs.readdir(oldFilePath);
-
-        for (const file of files) {
-            const filePath = path.join(oldFilePath, file);
-            const newFilePath = path.join(newFilePath, file);
-
-            await fs.copyFile(filePath, newFilePath);
-        }
-    };
-
-    let folderWithFilesStat = null;
-    let copyFolderWithFilesStat = null;
-
+export const copyFile = async (filePath, newFileDirectory) => {
     try {
-        folderWithFilesStat = await fs.stat(oldFilePath);
+        await fs.stat(filePath);
 
-        try {
-            copyFolderWithFilesStat = await fs.stat(newFilePath);
-        } catch (error) {
-            await cloneFolder(oldFilePath, newFilePath);
-        }
+        const fileName = getFileNameFromPath(filePath);
+        const newFilePath = path.join(newFileDirectory, fileName);
 
-        if (folderWithFilesStat && copyFolderWithFilesStat) {
-            await cloneFolder(oldFilePath, newFilePath);
-        }
+        await fs.copyFile(filePath, newFilePath);
     } catch (error) {
-        throw new Error('FS operation failed');
+        // throw new Error('FS operation failed');
     }
 };
 
-export const moveFile = async () => {
+export const moveFile = async (filePath, newFileDirectory) => {
+    try {
+        await copyFile(filePath, newFileDirectory);
+        await deleteFile(filePath);
+    } catch (error) {
 
+    }
 };

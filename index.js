@@ -3,21 +3,28 @@ import { osController, getHomeDirectory } from './domain/operatingSystem.js';
 import { hashController } from './domain/hash.js';
 import { decompressorController } from './domain/decompressor.js';
 import { compressorController } from './domain/compressor.js';
-import { upDirectory, changeDirectory, getListOfDirectoryFiles } from './domain/directory.js';
+import {
+    upDirectory,
+    changeDirectory,
+    getListOfDirectoryFiles
+} from './domain/directory.js';
 import {
     readAndPrintFileContent,
     createFileInDirectory,
     deleteFile,
-    renameFile, copyFile, moveFile
+    renameFile,
+    copyFile,
+    moveFile
 } from './domain/files.js';
+import { exitFromApplication } from "./domain/exit.js";
+import {
+    printExitMessage,
+    printMessageOfCurrentDirectory,
+    printStartMessage
+} from "./domain/printMessageToConsole.js";
 
 let username = process.argv[2].split('=')[1];
 let currentWorkingDirectory = getHomeDirectory();
-
-const printStartMessage = () => {
-    console.log(`Welcome to the File Manager, ${username}!`);
-    printMessageOfCurrentDirectory();
-};
 
 const OperationTypes = {
     upDirectory: 'up',
@@ -32,7 +39,8 @@ const OperationTypes = {
     deleteFile: 'rm',
     renameFile: 'rn',
     copyFile: 'cp',
-    moveFile: 'mv'
+    moveFile: 'mv',
+    exitFromApplication: '.exit',
 };
 
 const cliController = async (message) => {
@@ -43,6 +51,10 @@ const cliController = async (message) => {
     const args = message.splice(1, message.length);
 
     switch (operationType) {
+        case OperationTypes.exitFromApplication:
+            printExitMessage(username);
+            exitFromApplication();
+            break;
         case OperationTypes.os:
             osController(args[0]);
             break;
@@ -85,32 +97,19 @@ const cliController = async (message) => {
             break;
     }
 
-    printMessageOfCurrentDirectory();
-};
-
-const printMessageOfCurrentDirectory = () => {
-    console.log(`You are currently in ${currentWorkingDirectory}`);
+    printMessageOfCurrentDirectory(currentWorkingDirectory);
 };
 
 const cliMessageListener = () => {
-    process.stdin.on('data', (chunk) => {
-        cliController(chunk.toString());
+    process.stdin.on('data', async (chunk) => {
+        await cliController(chunk.toString());
     });
 };
 
-const invalidCommand = () => {
-    console.log('Invalid input');
-};
+printStartMessage(username, currentWorkingDirectory);
 
-const operationFailed = () => {
-    console.log('Operation failed');
-};
-
-printStartMessage();
-
-process.on('SIGINT', () => {
-    console.log(`Thank you for using File Manager, ${username}!`);
-
+process.on('SIGINT', (username) => {
+    printExitMessage(username);
     process.exit();
 });
 
