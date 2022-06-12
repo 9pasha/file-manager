@@ -13,28 +13,12 @@ export const upDirectory = (currentWorkingDirectory) => {
 };
 
 export const getListOfDirectoryFiles = async (directory) => {
-    const errorMessage = 'FS operation failed';
-
-    try {
-        await fs.stat(directory);
-    } catch (error) {
-        throw new Error(errorMessage);
-    }
-
     return await fs.readdir(directory);
 };
 
 export const changeDirectory = async (currentDirectoryPath, newDirectoryPath) => {
-    const errorMessage = 'FS operation failed';
     let changedPath = null;
-
-    try {
-        changedPath = path.resolve(currentDirectoryPath, newDirectoryPath);
-
-        await fs.stat(changedPath);
-    } catch (error) {
-        throw new Error(errorMessage);
-    }
+    changedPath = path.resolve(currentDirectoryPath, newDirectoryPath);
 
     return changedPath;
 };
